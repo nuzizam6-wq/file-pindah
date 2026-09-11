@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sandsics — Loading</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+}
+
+body{
+    font-family:'Press Start 2P',monospace;
+    image-rendering:pixelated;
+}
+
+#screen{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    overflow:hidden;
+    background:#10131c;
+}
+
+/* ================= PIXEL PHYSICS BACKGROUND ================= */
+
+#canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    image-rendering:pixelated;
+}
+
+/* Dark overlay */
+.overlay{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0,0,0,.05),
+            rgba(0,0,0,.52)
+        );
+    pointer-events:none;
+}
+
+/* Scanlines */
+.scanlines{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.12;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 3px,
+            #000 4px
+        );
+}
+
+/* ================= CENTER ================= */
+
+.center{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(700px,90vw);
+    text-align:center;
+}
+
+.logo{
+    font-size:clamp(38px,9vw,82px);
+    letter-spacing:4px;
+    color:#f4d58b;
+
+    text-shadow:
+        5px 5px 0 #8a4e38,
+        9px 9px 0 #241923;
+
+    animation:logoFloat 2.5s ease-in-out infinite;
+}
+
+.subtitle{
+    margin-top:14px;
+    font-size:clamp(7px,1.8vw,12px);
+    color:#d9e3e8;
+    text-shadow:2px 2px #111;
+    letter-spacing:2px;
+}
+
+/* ================= LOADING ================= */
+
+.loading{
+    margin:55px auto 0;
+    width:min(520px,85vw);
+}
+
+.loadingInfo{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:11px;
+    color:#eee;
+    font-size:clamp(7px,1.7vw,11px);
+    text-shadow:2px 2px #000;
+}
+
+.barOuter{
+    height:26px;
+    padding:4px;
+    background:#17151c;
+    border:3px solid #e0bb69;
+    box-shadow:
+        4px 4px 0 #000;
+}
+
+.barInner{
+    width:0%;
+    height:100%;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #e6c56e 0 12px,
+            #bc834b 12px 16px
+        );
+
+    transition:width .12s linear;
+}
+
+.tip{
+    margin-top:17px;
+    min-height:35px;
+    color:#c7d0d6;
+    font-size:clamp(6px,1.5vw,9px);
+    line-height:1.8;
+    text-shadow:2px 2px #000;
+}
+
+/* ================= CREDIT ================= */
+
+.credit{
+    position:absolute;
+    bottom:20px;
+    left:0;
+    width:100%;
+    text-align:center;
+    color:#9faab1;
+    font-size:clamp(7px,1.7vw,10px);
+    text-shadow:2px 2px #000;
+}
+
+.credit b{
+    color:#f0d080;
+}
+
+/* ================= PHYSICS STATUS ================= */
+
+.physics{
+    position:absolute;
+    top:18px;
+    left:18px;
+
+    color:#91a0a8;
+    font-size:7px;
+    line-height:1.9;
+
+    opacity:.75;
+    text-shadow:2px 2px #000;
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes logoFloat{
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+}
+
+/* Mobile */
+
+@media(max-width:600px){
+
+    .physics{
+        font-size:6px;
+        top:10px;
+        left:10px;
+    }
+
+    .loading{
+        margin-top:40px;
+    }
+
+    .barOuter{
+        height:22px;
+    }
+
+    .credit{
+        bottom:12px;
+    }
+}
+
+/* Landscape phone */
+
+@media(max-height:500px){
+
+    .logo{
+        font-size:38px;
+    }
+
+    .subtitle{
+        margin-top:5px;
+    }
+
+    .loading{
+        margin-top:18px;
+    }
+
+    .tip{
+        margin-top:8px;
+    }
+
+    .credit{
+        bottom:7px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="screen">
+
+    <!-- Physics simulation -->
+    <canvas id="canvas"></canvas>
+
+    <div class="overlay"></div>
+    <div class="scanlines"></div>
+
+    <div class="physics">
+        PHYSICS ENGINE<br>
+        PARTICLES: <span id="particles">0</span><br>
+        FPS: <span id="fps">60</span>
+    </div>
+
+    <div class="center">
+
+        <div class="logo">
+            SANDSICS
+        </div>
+
+        <div class="subtitle">
+            SANDBOXELS × PHYSICS
+        </div>
+
+        <div class="loading">
+
+            <div class="loadingInfo">
+                <span id="status">INITIALIZING...</span>
+                <span id="percent">0%</span>
+            </div>
+
+            <div class="barOuter">
+                <div class="barInner" id="bar"></div>
+            </div>
+
+            <div class="tip" id="tip">
+                Preparing the physics engine...
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="credit">
+        A GAME BY <b>NURZ</b>
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   SANDSICS PIXEL PHYSICS
+   ============================================================ */
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W,H;
+let scale = 4;
+
+function resize(){
+
+    W = Math.floor(innerWidth / scale);
+    H = Math.floor(innerHeight / scale);
+
+    canvas.width = W;
+    canvas.height = H;
+
+    canvas.style.imageRendering = "pixelated";
+}
+
+resize();
+addEventListener("resize",resize);
+
+
+/* ================= PARTICLES ================= */
+
+let particles = [];
+
+const TYPES = {
+    sand:{
+        color:"#d7a95c",
+        gravity:.35
+    },
+
+    water:{
+        color:"#4f9dcc",
+        gravity:.18
+    },
+
+    fire:{
+        color:"#e8893d",
+        gravity:-.08
+    },
+
+    smoke:{
+        color:"#74777d",
+        gravity:-.04
+    }
+};
+
+
+/* Create particle */
+
+function spawn(type,x,y){
+
+    particles.push({
+
+        type:type,
+        x:x,
+        y:y,
+
+        vx:(Math.random()-.5)*.25,
+        vy:Math.random()*1,
+
+        life: type==="fire"
+            ? 35+Math.random()*35
+            : 200+Math.random()*200
+
+    });
+}
+
+
+/* ================= CREATE WORLD ================= */
+
+function createWorld(){
+
+    particles=[];
+
+    /*
+       Sand
+    */
+
+    for(let i=0;i<420;i++){
+
+        spawn(
+            "sand",
+            W*.35 + Math.random()*W*.3,
+            Math.random()*H*.35
+        );
+    }
+
+    /*
+       Water
+    */
+
+    for(let i=0;i<120;i++){
+
+        spawn(
+            "water",
+            W*.15 + Math.random()*W*.2,
+            H*.35 + Math.random()*H*.15
+        );
+    }
+
+    /*
+       Fire
+    */
+
+    for(let i=0;i<45;i++){
+
+        spawn(
+            "fire",
+            W*.68 + Math.random()*W*.12,
+            H*.62 + Math.random()*8
+        );
+    }
+
+    /*
+       Smoke
+    */
+
+    for(let i=0;i<35;i++){
+
+        spawn(
+            "smoke",
+            W*.73 + Math.random()*W*.08,
+            H*.55
+        );
+    }
+}
+
+
+/* ================= PHYSICS ================= */
+
+function update(){
+
+    for(let p of particles){
+
+        const t = TYPES[p.type];
+
+        p.vy += t.gravity;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        /*
+          Simple boundaries
+        */
+
+        if(p.y > H-4){
+
+            p.y = H-4;
+            p.vy *= -.18;
+            p.vx *= .9;
+        }
+
+        if(p.x < 1){
+            p.x=1;
+            p.vx*=-.5;
+        }
+
+        if(p.x > W-2){
+            p.x=W-2;
+            p.vx*=-.5;
+        }
+
+
+        /*
+          Water movement
+        */
+
+        if(p.type==="water"){
+
+            p.vx += (Math.random()-.5)*.08;
+
+            p.vx *= .98;
+
+            if(Math.random()<.025){
+                p.vx += Math.random()>.5 ? .5 : -.5;
+            }
+        }
+
+
+        /*
+          Fire flicker
+        */
+
+        if(p.type==="fire"){
+
+            p.x += (Math.random()-.5)*.6;
+            p.life--;
+
+            if(p.life<=0){
+
+                p.type="smoke";
+                p.life=100;
+            }
+        }
+
+
+        /*
+          Smoke rises
+        */
+
+        if(p.type==="smoke"){
+
+            p.x += (Math.random()-.5)*.25;
+            p.life--;
+
+            if(p.life<=0){
+
+                p.x=W*.73+Math.random()*W*.08;
+                p.y=H*.58;
+                p.life=100;
+            }
+        }
+    }
+
+    /*
+      Fake sand pile effect:
+      particles near bottom settle.
+    */
+
+    particles.sort((a,b)=>a.y-b.y);
+}
+
+
+/* ================= DRAW ================= */
+
+function draw(){
+
+    ctx.clearRect(0,0,W,H);
+
+    /*
+      Pixel sky
+    */
+
+    ctx.fillStyle="#111522";
+    ctx.fillRect(0,0,W,H);
+
+    /*
+      Pixel stars
+    */
+
+    for(let i=0;i<80;i++){
+
+        const x=(i*73)%W;
+        const y=(i*37)%Math.floor(H*.55);
+
+        ctx.fillStyle =
+            i%3===0
+            ? "#e8d99d"
+            : "#737a91";
+
+        ctx.fillRect(x,y,1,1);
+    }
+
+
+    /*
+      Pixel ground
+    */
+
+    ctx.fillStyle="#4a3440";
+    ctx.fillRect(0,H*.72,W,H*.28);
+
+    /*
+      Distant sand
+    */
+
+    ctx.fillStyle="#765044";
+
+    for(let x=0;x<W;x+=5){
+
+        const y=
+            H*.68+
+            Math.sin(x*.09)*3+
+            Math.sin(x*.025)*5;
+
+        ctx.fillRect(x,y,5,H-y);
+    }
+
+
+    /*
+      Particles
+    */
+
+    for(let p of particles){
+
+        let c=TYPES[p.type].color;
+
+        if(p.type==="fire"){
+
+            c=
+                Math.random()>.5
+                ? "#ffb84d"
+                : "#e35d35";
+        }
+
+        if(p.type==="smoke"){
+
+            c =
+                p.life%2===0
+                ? "#686b73"
+                : "#85878c";
+        }
+
+        ctx.fillStyle=c;
+
+        ctx.fillRect(
+            Math.floor(p.x),
+            Math.floor(p.y),
+            2,
+            2
+        );
+    }
+}
+
+
+/* ================= LOADING ================= */
+
+const bar=document.getElementById("bar");
+const percent=document.getElementById("percent");
+const status=document.getElementById("status");
+const tip=document.getElementById("tip");
+const particleText=document.getElementById("particles");
+
+const tips=[
+
+    "Tip: Too many element on screen can causes lag.",
+    
+    "Tip: Every element follows its own physical rules.",
+
+    "Tip: Sand falls. Water flows. Fire rises.",
+
+    "Tip: Combine elements and see what happens.",
+
+    "Tip: The world of Sandsics is completely yours.",
+
+    "Tip: Experimentation is the heart of the sandbox."
+
+];
+
+const statuses=[
+
+    "INITIALIZING PHYSICS...",
+    "LOADING ELEMENTS...",
+    "CREATING PARTICLES...",
+    "BUILDING SANDBOX...",
+    "CALCULATING GRAVITY...",
+    "SIMULATING MATERIALS...",
+    "ALMOST READY...",
+    "READY!"
+
+];
+
+let progress=0;
+
+function loading(){
+
+    progress +=
+        Math.random()*1.8 + .4;
+
+    if(progress>100)
+        progress=100;
+
+    bar.style.width=progress+"%";
+
+    percent.textContent=
+        Math.floor(progress)+"%";
+
+
+    let index=
+        Math.min(
+            Math.floor(progress/14),
+            statuses.length-1
+        );
+
+    status.textContent=statuses[index];
+
+
+    if(Math.random()<.025){
+
+        tip.textContent=
+            tips[
+                Math.floor(
+                    Math.random()*tips.length
+                )
+            ];
+    }
+
+
+    if(progress>=100){
+
+        status.textContent="READY!";
+
+        setTimeout(()=>{
+
+            status.textContent=
+                "ENTERING SANDSICS...";
+window.location.href = "game.html";
+        },700);
+    }
+}
+
+
+/* ================= FPS ================= */
+
+let last=performance.now();
+let frames=0;
+
+function fpsCounter(){
+
+    frames++;
+
+    const now=performance.now();
+
+    if(now-last>=1000){
+
+        document.getElementById("fps")
+            .textContent=frames;
+
+        frames=0;
+        last=now;
+    }
+
+    requestAnimationFrame(fpsCounter);
+}
+
+
+/* ================= GAME LOOP ================= */
+
+createWorld();
+
+function loop(){
+
+    update();
+    draw();
+
+    particleText.textContent=
+        particles.length;
+
+    if(progress<100)
+        loading();
+
+    requestAnimationFrame(loop);
+}
+
+fpsCounter();
+loop();
+
+</script>
+
+</body>
+</html>

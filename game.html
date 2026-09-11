@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sandbox Fisika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <button id="hamburgerBtn" aria-label="Menu">&#9776;</button>
+
+  <div id="canvasWrap">
+    <canvas id="sandbox"></canvas>
+    <div id="hint">Sentuh &amp; geser untuk menggambar</div>
+  </div>
+
+  <div id="drawerOverlay"></div>
+  <div id="drawer">
+    <div class="drawerHead">Pengaturan</div>
+
+    <div class="drawerSection">
+      <span class="grpLabel">Resolusi</span>
+      <div class="drawerRow">
+        <button class="sizeBtn" data-cell="12">Kecil</button>
+        <button class="sizeBtn active" data-cell="6">Sedang</button>
+        <button class="sizeBtn" data-cell="4">Besar</button>
+        <button class="sizeBtn" data-cell="2">Lebih Besar</button>
+      </div>
+    </div>
+
+    <div class="drawerSection">
+      <span class="grpLabel">Multiplayer (Hotspot)</span>
+      <div id="mpStatus" class="mpStatus">Belum terhubung</div>
+      <div class="drawerRow">
+        <button id="mpHostBtn">Jadi Host</button>
+        <button id="mpJoinBtn">Gabung</button>
+        <button id="mpDisconnectBtn" style="display:none">Putuskan</button>
+      </div>
+
+      <div id="mpHostFlow" style="display:none">
+        <p class="mpHint">1. Kirim kode ini ke teman (chat/screenshot):</p>
+        <textarea id="mpOfferOut" class="mpBox" readonly></textarea>
+        <div class="drawerRow"><button id="mpCopyOffer">Salin Kode</button></div>
+        <p class="mpHint">2. Tempel kode balasan dari teman di sini:</p>
+        <textarea id="mpAnswerIn" class="mpBox" placeholder="Tempel kode balasan..."></textarea>
+        <div class="drawerRow"><button id="mpConnectHost">Sambungkan</button></div>
+      </div>
+
+      <div id="mpJoinFlow" style="display:none">
+        <p class="mpHint">1. Tempel kode dari Host di sini:</p>
+        <textarea id="mpOfferIn" class="mpBox" placeholder="Tempel kode Host..."></textarea>
+        <div class="drawerRow"><button id="mpMakeAnswer">Buat Kode Balasan</button></div>
+        <p class="mpHint">2. Kirim kode ini balik ke Host:</p>
+        <textarea id="mpAnswerOut" class="mpBox" readonly></textarea>
+        <div class="drawerRow"><button id="mpCopyAnswer">Salin Kode</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toolbar">
+    <div id="controlsRow">
+      <button class="modeBtn active" data-mode="paint">Gambar</button>
+      <button class="modeBtn" data-mode="drag">Geser</button>
+      <button class="modeBtn" data-mode="physics">Fisika</button>
+      <button id="pauseBtn">||</button>
+      <button id="brushBtn">1</button>
+      <button id="clearBtn">Bersihkan</button>
+    </div>
+    <div id="categoryRow"></div>
+    <div id="elementsRow"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

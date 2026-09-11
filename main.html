@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sandsics — Main Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+html,body{
+  width:100%;height:100%;margin:0;overflow:hidden;
+  background:#10131c;
+  font-family:'Press Start 2P',monospace;
+  image-rendering:pixelated;
+  color:#eee;
+  user-select:none;
+}
+#screen{position:relative;width:100%;height:100dvh;overflow:hidden;background:#10131c}
+#world{
+  position:absolute;inset:0;width:100%;height:100%;
+  image-rendering:pixelated;
+}
+.overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at center,rgba(0,0,0,.05),rgba(0,0,0,.62)),
+    linear-gradient(180deg,rgba(8,10,18,.15),rgba(8,8,12,.5));
+}
+.scanlines{
+  position:absolute;inset:0;pointer-events:none;opacity:.12;
+  background:repeating-linear-gradient(to bottom,transparent 0 3px,#000 4px);
+}
+.physics{
+  position:absolute;top:18px;left:18px;
+  color:#91a0a8;font-size:7px;line-height:1.9;
+  text-shadow:2px 2px #000;opacity:.75;
+}
+.version{
+  position:absolute;top:18px;right:18px;
+  color:#9faab1;font-size:7px;text-shadow:2px 2px #000;
+}
+.menu{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(600px,90vw);text-align:center;
+}
+.logo{
+  font-size:clamp(42px,11vw,88px);
+  letter-spacing:4px;color:#f4d58b;
+  text-shadow:5px 5px 0 #8a4e38,9px 9px 0 #241923;
+  animation:float 2.5s ease-in-out infinite;
+}
+.subtitle{
+  margin-top:12px;color:#d9e3e8;
+  font-size:clamp(7px,1.8vw,12px);
+  letter-spacing:2px;text-shadow:2px 2px #111;
+}
+.buttons{
+  width:min(330px,80vw);margin:42px auto 0;
+  display:flex;flex-direction:column;gap:13px;
+}
+button{
+  width:100%;padding:15px 12px;
+  background:#1c1e29;color:#eee;
+  border:3px solid #000;
+  box-shadow:
+    inset 3px 3px 0 rgba(255,255,255,.13),
+    inset -3px -3px 0 rgba(0,0,0,.45),
+    5px 5px 0 #000;
+  font:inherit;font-size:11px;letter-spacing:.5px;
+  cursor:pointer;
+}
+button:hover{background:#2e3548}
+button:active{
+  transform:translate(3px,3px);
+  box-shadow:inset 2px 2px 0 rgba(255,255,255,.1),inset -2px -2px 0 rgba(0,0,0,.4);
+}
+#play{
+  background:#3a3f66;color:#fff;border-color:#f0d080;
+  box-shadow:
+    inset 3px 3px 0 rgba(255,255,255,.22),
+    inset -3px -3px 0 rgba(0,0,0,.4),
+    5px 5px 0 #000;
+}
+#play:hover{background:#485078}
+.footer{
+  position:absolute;bottom:18px;left:0;width:100%;text-align:center;
+  color:#9faab1;font-size:7px;line-height:1.8;text-shadow:2px 2px #000;
+}
+.footer b{color:#f0d080}
+.modal{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.68);z-index:10;padding:20px;
+}
+.modal.open{display:flex}
+.panel{
+  width:min(430px,90vw);background:#14151d;
+  border:4px solid #2a2d3d;
+  box-shadow:7px 7px 0 #000;padding:22px;
+}
+.panel h2{
+  margin:0 0 20px;color:#f4d58b;font-size:15px;
+  text-shadow:3px 3px #241923;
+}
+.panel p{font-size:8px;line-height:2;color:#c7d0d6}
+.close{margin-top:14px}
+.setting{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:2px solid #292c38;padding:13px 0;font-size:8px;
+}
+.setting button{width:auto;padding:9px;font-size:8px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@media(max-height:500px){
+  .logo{font-size:42px}.buttons{margin-top:22px;gap:8px}
+  button{padding:10px}.footer{bottom:7px}
+}
+</style>
+</head>
+
+<body>
+<div id="screen">
+  <canvas id="world"></canvas>
+  <div class="overlay"></div>
+  <div class="scanlines"></div>
+
+  <div class="physics">
+    PHYSICS ENGINE<br>
+    PARTICLES: <span id="particles">0</span><br>
+    FPS: <span id="fps">60</span>
+  </div>
+  <div class="version">SANDSICS v1.0</div>
+
+  <main class="menu">
+    <div class="logo">SANDSICS</div>
+    <div class="subtitle">SANDBOXELS × PHYSICS</div>
+
+    <div class="buttons">
+      <button id="play">▶ &nbsp; MULAI BERMAIN</button>
+      <button id="settings">⚙ &nbsp; PENGATURAN</button>
+      <button id="credits">◆ &nbsp; KREDIT</button>
+      <button id="exit">× &nbsp; KELUAR</button>
+    </div>
+  </main>
+
+  <div class="footer">
+    A GAME BY <b>NURZ</b><br>
+    EXPERIMENT • CREATE • DISCOVER
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="panel">
+      <h2>PENGATURAN</h2>
+      <div class="setting"><span>SCANLINES</span><button id="scanBtn">ON</button></div>
+      <div class="setting"><span>PARTIKEL LATAR</span><button id="particleBtn">ON</button></div>
+      <div class="setting"><span>UKURAN UI</span><button id="uiBtn">NORMAL</button></div>
+      <button class="close" data-close>TUTUP</button>
+    </div>
+  </div>
+
+  <div class="modal" id="creditsModal">
+    <div class="panel">
+      <h2>SANDSICS</h2>
+      <p>
+        SANDBOXELS × PHYSICS<br><br>
+        Sebuah dunia pixel tempat pasir jatuh,
+        air mengalir, api menyala, dan berbagai
+        elemen dapat bereaksi satu sama lain.
+        <br><br>
+        GAME BY NURZ
+      </p>
+      <button class="close" data-close>TUTUP</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById("world");
+const ctx=canvas.getContext("2d");
+let W=0,H=0,DPR=1, particles=[], running=true, scan=true, particleOn=true;
+
+function resize(){
+  DPR=Math.max(1,Math.min(2,devicePixelRatio||1));
+  W=Math.max(120,Math.floor(innerWidth/4));
+  H=Math.max(70,Math.floor(innerHeight/4));
+  canvas.width=W;canvas.height=H;
+}
+addEventListener("resize",resize); resize();
+
+const TYPES=[
+  ["sand","#d7a95c",.30,1],
+  ["water","#4f9dcc",.16,1],
+  ["fire","#e8893d",-0.07,1],
+  ["smoke","#74777d",-0.035,.6]
+];
+
+function spawn(type,x,y){
+  particles.push({
+    type,x,y,vx:(Math.random()-.5)*.25,vy:Math.random()*1.1,
+    life:type===2?30+Math.random()*35:180+Math.random()*160
+  });
+}
+function seed(){
+  particles=[];
+  for(let i=0;i<220;i++)spawn(0,W*.36+Math.random()*W*.28,Math.random()*H*.42);
+  for(let i=0;i<75;i++)spawn(1,W*.12+Math.random()*W*.20,H*.35+Math.random()*H*.18);
+  for(let i=0;i<24;i++)spawn(2,W*.70+Math.random()*W*.10,H*.60+Math.random()*8);
+  for(let i=0;i<20;i++)spawn(3,W*.73+Math.random()*W*.08,H*.54);
+}
+seed();
+
+function update(){
+  if(!particleOn)return;
+  for(const p of particles){
+    const t=TYPES[p.type];
+    p.vy+=t[2];p.x+=p.vx;p.y+=p.vy;
+    if(p.y>H-4){p.y=H-4;p.vy*=-.18;p.vx*=.9}
+    if(p.x<1){p.x=1;p.vx*=-.5}
+    if(p.x>W-2){p.x=W-2;p.vx*=-.5}
+    if(p.type===1){p.vx+=(Math.random()-.5)*.07;p.vx*=.98}
+    if(p.type===2){
+      p.x+=(Math.random()-.5)*.55;p.life--;
+      if(p.life<=0){p.type=3;p.life=90}
+    }
+    if(p.type===3){
+      p.x+=(Math.random()-.5)*.22;p.life--;
+      if(p.life<=0){p.x=W*.73+Math.random()*W*.08;p.y=H*.58;p.life=90}
+    }
+  }
+}
+
+function draw(){
+  ctx.fillStyle="#111522";ctx.fillRect(0,0,W,H);
+  for(let i=0;i<70;i++){
+    const x=(i*73)%W,y=(i*37)%Math.floor(H*.55);
+    ctx.fillStyle=i%3===0?"#e8d99d":"#737a91";ctx.fillRect(x,y,1,1);
+  }
+  ctx.fillStyle="#4a3440";ctx.fillRect(0,H*.72,W,H*.28);
+  ctx.fillStyle="#765044";
+  for(let x=0;x<W;x+=5){
+    const y=H*.68+Math.sin(x*.09)*3+Math.sin(x*.025)*5;
+    ctx.fillRect(x,y,5,H-y);
+  }
+  if(particleOn)for(const p of particles){
+    let c=TYPES[p.type][1];
+    if(p.type===2)c=Math.random()>.5?"#ffb84d":"#e35d35";
+    if(p.type===3)c=p.life%2===0?"#686b73":"#85878c";
+    ctx.fillStyle=c;ctx.fillRect(Math.floor(p.x),Math.floor(p.y),2,2);
+  }
+}
+let last=performance.now(),frames=0;
+function loop(){
+  if(running){update();draw()}
+  frames++;const now=performance.now();
+  if(now-last>=1000){
+    document.getElementById("fps").textContent=frames;
+    document.getElementById("particles").textContent=particleOn?particles.length:0;
+    frames=0;last=now;
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+
+document.getElementById("play").onclick=()=>location.href="loading.html";
+document.getElementById("settings").onclick=()=>document.getElementById("settingsModal").classList.add("open");
+document.getElementById("credits").onclick=()=>document.getElementById("creditsModal").classList.add("open");
+document.getElementById("exit").onclick=()=>{
+  document.querySelector(".menu").innerHTML=
+    '<div class="logo" style="font-size:clamp(28px,7vw,55px)">SAMPAI JUMPA</div><div class="subtitle">TAB UNTUK KEMBALI</div>';
+};
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".modal").classList.remove("open"));
+
+document.getElementById("scanBtn").onclick=function(){
+  scan=!scan;this.textContent=scan?"ON":"OFF";
+  document.querySelector(".scanlines").style.display=scan?"block":"none";
+};
+document.getElementById("particleBtn").onclick=function(){
+  particleOn=!particleOn;this.textContent=particleOn?"ON":"OFF";
+  if(particleOn)seed();
+};
+let big=false;
+document.getElementById("uiBtn").onclick=function(){
+  big=!big;this.textContent=big?"BESAR":"NORMAL";
+  document.body.style.fontSize=big?"1.08em":"1em";
+};
+</script>
+</body>
+</html>
